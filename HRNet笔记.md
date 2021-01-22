@@ -919,6 +919,15 @@ Block相当于积木，每个layer都由若干Block搭建而成，再由layer组
 
 
 
+## 5. 心得
+
+### 5.1 Loss函数
+
++ 如果给不可见关键点在loss中的权重设得太高，那么FP会减少，同时TP可能也会减少，因此AP可能会减少、AR可能会减少；
++ 如果给不可见关键点在loss中的权重设得很低，甚至为0，那么TP会增多，同时FP也会增多，因此AP可能会减少、AR会升高；
+
+
+
 ## 参考资料
 
 1. [论文：Deep High-Resolution Representation Learning for Human Pose Estimation](https://arxiv.org/abs/1902.09212)
