@@ -25,7 +25,7 @@ from tensorboardX import SummaryWriter
 import _init_paths
 from config import cfg
 from config import update_config
-from core.loss import JointsMSELoss
+from core.loss import JointsMSELoss, JointsMSELossTargetWeight
 from core.function import train
 from core.function import validate
 from utils.utils import get_optimizer
@@ -136,8 +136,12 @@ def main():
 
     # define loss function (criterion) and optimizer
     # 用于计算loss
-    criterion = JointsMSELoss(
-        use_target_weight=cfg.LOSS.USE_TARGET_WEIGHT
+    # criterion = JointsMSELoss(
+    #     use_target_weight=cfg.LOSS.USE_TARGET_WEIGHT
+    # ).cuda()
+    criterion = JointsMSELossTargetWeight(
+        use_target_weight=cfg.LOSS.USE_TARGET_WEIGHT,
+        loss_invis_weight=0.05,
     ).cuda()
 
     # Data loading code

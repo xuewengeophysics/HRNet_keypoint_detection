@@ -12,6 +12,39 @@ import torch
 import torch.nn as nn
 
 
+class JointsMSELossTargetWeight(nn.Module):
+    def __init__(self, use_target_weight, loss_invis_weight):
+        super(JointsMSELossTargetWeight, self).__init__()
+        self.criterion = nn.MSELoss(reduction='mean')
+        self.use_target_weight = use_target_weight
+        self.loss_invis_weight = loss_invis_weight
+
+    def forward(self, output, target, target_weight):
+        ##target_weight的torch.Size([16, 4, 1]) [batch_size, num_joints, 1]
+        batch_size = output.size(0)
+        num_joints = output.size(1)
+        heatmaps_pred = output.reshape((batch_size, num_joints, -1)).split(1, 1)
+        heatmaps_gt = target.reshape((batch_size, num_joints, -1)).split(1, 1)
+        loss = 0
+
+        for idx in range(num_joints):
+            heatmap_pred = heatmaps_pred[idx].squeeze()
+            heatmap_gt = heatmaps_gt[idx].squeeze()
+            if self.use_target_weight:
+                loss_invis = self.criterion(
+                    heatmap_pred.mul(1.0 - target_weight[:, idx]),
+                    heatmap_gt.mul(1.0 - target_weight[:, idx])
+                )
+                loss += (self.loss_invis_weight * loss_invis + (0.5 - self.loss_invis_weight) * self.criterion(
+                    heatmap_pred.mul(target_weight[:, idx]),
+                    heatmap_gt.mul(target_weight[:, idx])
+                ))
+            else:
+                loss += 0.5 * self.criterion(heatmap_pred, heatmap_gt)
+
+        return loss / num_joints
+
+
 class JointsMSELoss(nn.Module):
     def __init__(self, use_target_weight):
         super(JointsMSELoss, self).__init__()

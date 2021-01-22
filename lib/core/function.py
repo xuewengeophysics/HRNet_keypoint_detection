@@ -43,6 +43,7 @@ def train(config, train_loader, model, criterion, optimizer, epoch,
         outputs = model(input)
 
         target = target.cuda(non_blocking=True)
+        ##target_weight的torch.Size([16, 4, 1]) [batch_size, num_joints, 1]
         target_weight = target_weight.cuda(non_blocking=True)
 
         if isinstance(outputs, list):
